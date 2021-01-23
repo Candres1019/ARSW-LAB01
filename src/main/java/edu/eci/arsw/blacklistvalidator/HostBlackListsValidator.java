@@ -20,10 +20,11 @@ import java.util.logging.Logger;
 public class HostBlackListsValidator {
 
     private static final int BLACK_LIST_ALARM_COUNT=5;
+    private static Integer maxBlackList=0;
 
     private int ocurrencesCount, checkedListsCount;
     private LinkedList<Integer> blackListOcurrences;
-    
+
     /**
      * Check the given host's IP address in all the available black lists,
      * and report it as NOT Trustworthy when such IP was reported in at least
@@ -101,11 +102,11 @@ public class HostBlackListsValidator {
         for (int i=0; i<threadsNumber; i++){
             if (i == (threadsNumber -1) && (threadsNumber%2 != 0)){
                 target += sdks.getRegisteredServersCount()%threadsNumber;
-                HostBlackListThread thread = new HostBlackListThread(sdks, source, target, ipaddress);
+                HostBlackListThread thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
                 threads.add(thread);
                 thread.start();
             }else{
-                HostBlackListThread thread = new HostBlackListThread(sdks, source, target, ipaddress);
+                HostBlackListThread thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
                 threads.add(thread);
                 thread.start();
                 source = target + 1;
