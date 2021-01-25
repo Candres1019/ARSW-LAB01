@@ -10,6 +10,7 @@ import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
 public class HostBlackListsValidator {
 
     private static final int BLACK_LIST_ALARM_COUNT=5;
-    private static Integer maxBlackList=0;
+    private static AtomicInteger maxBlackList= new AtomicInteger(0);
 
     private int ocurrencesCount, checkedListsCount;
     private LinkedList<Integer> blackListOcurrences;
@@ -51,32 +52,6 @@ public class HostBlackListsValidator {
             division = skds.getRegisteredServersCount() / threadsNumber;
             this.checkHostThreads(threadsNumber, division, skds, ipaddress);
         }
-
-        
-        /*for (int i=0;i<skds.getRegisteredServersCount() && ocurrencesCount<BLACK_LIST_ALARM_COUNT;i++){
-            checkedListsCount++;
-            
-            if (skds.isInBlackListServer(i, ipaddress)){
-                
-                blackListOcurrences.add(i);
-                
-                ocurrencesCount++;
-            }
-        }*/
-
-        /*HostBlackListThread thread1 = new HostBlackListThread(skds, 0, 8000, ipaddress);
-
-        thread1.start();
-
-        try {
-            thread1.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        ocurrencesCount = thread1.getOcurrencesCount();
-        checkedListsCount = thread1.getCheckedListsCount();
-        blackListOcurrences = thread1.getBlackListOcurrences();*/
         
         if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
             skds.reportAsNotTrustworthy(ipaddress);
@@ -93,25 +68,33 @@ public class HostBlackListsValidator {
     
     private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
 
-    /*Orden con la creacion de hilos*/
+    /**
+     *Método para el uso de multiHilos
+     * @param threadsNumber
+     * @param division
+     * @param sdks
+     * @param ipaddress
+     */
     public void checkHostThreads(int threadsNumber, int division, HostBlacklistsDataSourceFacade sdks, String ipaddress){
         ArrayList<HostBlackListThread> threads = new ArrayList<>();
         int source = 0;
         int target = division;
 
         for (int i=0; i<threadsNumber; i++){
+            HostBlackListThread thread;
             if (i == (threadsNumber -1) && (threadsNumber%2 != 0)){
                 target += sdks.getRegisteredServersCount()%threadsNumber;
-                HostBlackListThread thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
-                threads.add(thread);
-                thread.start();
+                thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
             }else{
-                HostBlackListThread thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
-                threads.add(thread);
-                thread.start();
+                thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
                 source = target + 1;
                 target = source + division;
             }
+            threads.add(thread);
+        }
+
+        for (HostBlackListThread thread : threads){
+            thread.start();
         }
 
         for (HostBlackListThread thread : threads){
