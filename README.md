@@ -4,9 +4,9 @@
 ## Ejercicio Introducción al paralelismo - Hilos - Caso BlackListSearch
 
 ### Integrantes:
-> Juan Sebastian Ramos Isaza
+> Juan Sebastian Ramos Isaza.
 > 
-> Andres Mateo Calderon Ortega
+> Andres Mateo Calderon Ortega.
 
 ### Descripción
   Este ejercicio contiene una introducción a la programación con hilos en Java, además de la aplicación a un caso concreto.
