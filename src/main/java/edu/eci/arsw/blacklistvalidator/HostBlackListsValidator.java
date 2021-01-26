@@ -80,17 +80,23 @@ public class HostBlackListsValidator {
         int source = 0;
         int target = division;
 
-        for (int i=0; i<threadsNumber; i++){
-            HostBlackListThread thread;
-            if (i == (threadsNumber -1) && (threadsNumber%2 != 0)){
-                target += sdks.getRegisteredServersCount()%threadsNumber;
-                thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
-            }else{
-                thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
-                source = target + 1;
-                target = source + division;
+        try {
+            for (int i = 0; i < threadsNumber; i++) {
+                HostBlackListThread thread;
+                if (i == (threadsNumber - 1) && (threadsNumber % 2 != 0)) {
+                    target += sdks.getRegisteredServersCount() % threadsNumber;
+                    thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
+                    thread.join();
+                } else {
+                    thread = new HostBlackListThread(sdks, source, target, ipaddress, maxBlackList, BLACK_LIST_ALARM_COUNT);
+                    source = target + 1;
+                    target = source + division;
+                    thread.join();
+                }
+                threads.add(thread);
             }
-            threads.add(thread);
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
         for (HostBlackListThread thread : threads){

@@ -1,3 +1,4 @@
+edu\eci\arsw\blacklistvalidator\HostBlackListThread.class
 edu\eci\arsw\spamkeywordsdatasource\HostBlacklistsDataSourceFacade.class
 edu\eci\arsw\blacklistvalidator\HostBlackListsValidator.class
 edu\eci\arsw\spamkeywordsdatasource\Touple.class
